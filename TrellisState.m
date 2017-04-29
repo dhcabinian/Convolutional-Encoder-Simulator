@@ -2,33 +2,52 @@ classdef TrellisState
     properties
         id;
         state;
-        pathToThisPoint;
-        path_metric=0;
+        path;
+        path_metric;
         branches;
+        reached;
     end
     
     methods
         function obj = TrellisState(state, branches)
             if (nargin > 0)
-                obj.id = bi2de(state) + 1;
+                obj.id = bi2de(state,'left-msb') + 1;
+                if (bi2de(state,'left-msb') == 0)
+                    obj.reached = true;
+                else
+                    obj.reached = false;
+                end
                 obj.state = state;
                 obj.branches = branches;
                 obj.path_metric = 0;
-                obj.pathToThisPoint = [];
+                obj.path = [];
             end
         end
 
-        
-        function new_path_metric = compute_hard_path_metric(s)
-            
-            
+        function [pathMetric1, pathMetric2] = computePathMetric(obj, c)
+            %States in cell array in format
+            % {memory contents, m, branch metric} 
+            [branchMetric1, branchMetric2] = obj.branches.computeBranchMetric(c);
+            pathMetric1 = branchMetric1;
+            pathMetric1{3} = pathMetric1{3} + obj.path_metric;
+            pathMetric1{2} = [obj.path branchMetric1{2}];
+            pathMetric2 = branchMetric2;
+            pathMetric2{3} = pathMetric2{3} + obj.path_metric;     
+            pathMetric2{2} = [obj.path branchMetric2{2}];
+            return
         end
         
-        function new_path_metric = compute_soft_path_metric(r)
-            sigma = ?
-            r = ?
-            alpha= ?
-            new_path_metric = log(1/(sqrt(2*pi)*sigma))*exp(-1*((mag(r-s))^2)/(2*sigma^2))*alpha-((mag(r-s))^2);
+        function obj = updatePath(obj, pathMetric)
+            % {memory contents, path, path metric}
+            if isequal(pathMetric{1}, obj.state)
+                obj.path_metric = pathMetric{3};
+                obj.path = pathMetric{2};
+                obj.reached = true;
+            else
+                error('Error occured in TrellisState/updatePath')
+                
+            end
         end
+
     end
 end
