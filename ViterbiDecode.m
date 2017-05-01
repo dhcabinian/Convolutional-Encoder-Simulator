@@ -2,24 +2,43 @@ classdef ViterbiDecode
     properties
         states;
         start_states;
+        constellation;
+        decodeType;
     end
     
     methods
-        function obj = ViterbiDecode(lengthOfFilter, fhEncode)
+        function obj = ViterbiDecode(lengthOfFilter, fhEncode, constellation, decodeType)
             obj.states = computeStateMachine(lengthOfFilter, fhEncode);
             obj.start_states = obj.states;
+            obj.constellation = constellation;
+            if strcmp(decodeType,'soft')
+                obj.decodeType = 1;
+            elseif strcmp(decodeType,'hard')
+                obj.decodeType = 0;
+            end
         end
-
-        function decodedMessage = decodeMessage(obj, r)
+        
+        function decodedMessage = decodeMsg(obj, r)
+            if obj.decodeType == 0
+                decodedMessage = obj.decodeBitMessage(r);
+            elseif obj.decodeType == 1
+                decodedMessage = obj.decodeSymbMessage(r);
+            else
+                error('Incorrect decode type')
+            end
+            return
+        end
+            
+        function decodedMessage = decodeBitMessage(obj, r)
             %For each pair of bits in m recieved
             computedMetrics = containers.Map(1:length(obj.states), cell(1,length(obj.states)));
             %Converting the recieved vector into per time transition cell
             % arrays
-            if mod(length(r), 2) ~= 0 
+            if mod(length(r), obj.constellation.constBitSize) ~= 0 
                 r = [r 0];
             end
             
-            numberOfC = length(r) / 2;
+            numberOfC = length(r) / obj.constellation.constBitSize;
             cs = transpose(reshape(r, [], numberOfC));
             for row = 1:size(cs,1)
                 c = cs(row, :)
@@ -27,7 +46,56 @@ classdef ViterbiDecode
                 %For each state at time = t in the trellis
                 for state = obj.states
                     if state.reached
-                       [pathMetric1, pathMetric2] = state.computePathMetric(c);
+                       [pathMetric1, pathMetric2] = state.computePathMetric(c, obj.constellation);
+                        % Path metric
+                        % {memory contents, path, path metric} 
+                        state_id = bi2de(pathMetric1{1},'left-msb') + 1;
+                        currentMetric = computedMetrics(state_id);
+                        if isempty(currentMetric) == 1
+                            computedMetrics(state_id) = pathMetric1;
+                        else
+                            if currentMetric{3} >= pathMetric1{3}
+                                 computedMetrics(state_id) = pathMetric1;
+                            end
+                        end
+                        state_id = bi2de(pathMetric2{1},'left-msb') + 1;
+                        currentMetric = computedMetrics(state_id);
+                        if isempty(currentMetric) == 1
+                            computedMetrics(state_id) = pathMetric2;
+                        else
+                            if currentMetric{3} >= pathMetric2{3}
+                                 computedMetrics(state_id) = pathMetric2;
+                            end
+                        end  
+                    end
+                end
+                %All Path metrics have been calculated and filtered
+                %Need to apply changes
+                
+                for key = 1:length(obj.states)
+                    pathMetric = computedMetrics(key);
+                    % {memory contents, path, path metric}
+                    if isempty(pathMetric) == 0
+                        state = obj.states(key);
+                        updatedState = state.updatePath(pathMetric);
+                        obj.states(key) = updatedState;
+                    end
+                end
+            end
+            decodedMessage = findMessage(obj.states);
+            obj.states = obj.start_states;
+            return
+        end
+        
+        function decodedMessage = decodeSymbMessage(obj, r)
+            %For each pair of bits in m recieved
+            computedMetrics = containers.Map(1:length(obj.states), cell(1,length(obj.states)));
+            for symb = r
+                clearBranchMetricMap(computedMetrics);
+                %For each state at time = t in the trellis
+                for state = obj.states
+                    if state.reached
+                       [pathMetric1, pathMetric2] = state.computePathMetricSymb(symb, obj.constellation);
                         % Path metric
                         % {memory contents, path, path metric} 
                         state_id = bi2de(pathMetric1{1},'left-msb') + 1;

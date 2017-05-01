@@ -24,12 +24,29 @@ classdef TrellisState
             end
         end
 
-        function [pathMetric1, pathMetric2] = computePathMetric(obj, c)
+        function [pathMetric1, pathMetric2] = computePathMetric(obj, c, constellation)
             % Branch metric
             % {memory contents, m, branch metric} 
             % Path metric
             % {memory contents, path, path metric} 
-            [branchMetric1, branchMetric2] = obj.branches.computeBranchMetric(c);
+            [branchMetric1, branchMetric2] = obj.branches.computeBranchMetric(c, constellation);
+            pathMetric1 = branchMetric1;
+            pathMetric1{3} = pathMetric1{3} + obj.path_metric;
+            pathMetric1{2} = [obj.path branchMetric1{2}];
+            pathMetric2 = branchMetric2;
+            pathMetric2{3} = pathMetric2{3} + obj.path_metric;     
+            pathMetric2{2} = [obj.path branchMetric2{2}];
+            return
+        end
+        
+        
+
+        function [pathMetric1, pathMetric2] = computePathMetricSymb(obj, symb, constellation)
+            % Branch metric
+            % {memory contents, m, branch metric} 
+            % Path metric
+            % {memory contents, path, path metric} 
+            [branchMetric1, branchMetric2] = obj.branches.computeBranchMetricSymb(symb, constellation);
             pathMetric1 = branchMetric1;
             pathMetric1{3} = pathMetric1{3} + obj.path_metric;
             pathMetric1{2} = [obj.path branchMetric1{2}];
