@@ -25,8 +25,10 @@ classdef TrellisState
         end
 
         function [pathMetric1, pathMetric2] = computePathMetric(obj, c)
-            %States in cell array in format
+            % Branch metric
             % {memory contents, m, branch metric} 
+            % Path metric
+            % {memory contents, path, path metric} 
             [branchMetric1, branchMetric2] = obj.branches.computeBranchMetric(c);
             pathMetric1 = branchMetric1;
             pathMetric1{3} = pathMetric1{3} + obj.path_metric;
@@ -38,7 +40,8 @@ classdef TrellisState
         end
         
         function obj = updatePath(obj, pathMetric)
-            % {memory contents, path, path metric}
+            % Path metric
+            % {memory contents, m, path metric} 
             if isequal(pathMetric{1}, obj.state)
                 obj.path_metric = pathMetric{3};
                 obj.path = pathMetric{2};

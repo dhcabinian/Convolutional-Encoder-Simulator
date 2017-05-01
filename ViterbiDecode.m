@@ -9,11 +9,7 @@ classdef ViterbiDecode
             obj.states = computeStateMachine(lengthOfFilter, fhEncode);
             obj.start_states = obj.states;
         end
-      
-%         function decodeC()
-%             
-%         end
-        
+
         function decodedMessage = decodeMessage(obj, r)
             %For each pair of bits in m recieved
             computedMetrics = containers.Map(1:length(obj.states), cell(1,length(obj.states)));
@@ -32,23 +28,23 @@ classdef ViterbiDecode
                 for state = obj.states
                     if state.reached
                        [pathMetric1, pathMetric2] = state.computePathMetric(c);
-                        %States in cell array in format
-                        % {memory contents, m, path metric} 
+                        % Path metric
+                        % {memory contents, path, path metric} 
                         state_id = bi2de(pathMetric1{1},'left-msb') + 1;
                         currentMetric = computedMetrics(state_id);
-                        if isempty(currentMetric)
+                        if isempty(currentMetric) == 1
                             computedMetrics(state_id) = pathMetric1;
                         else
-                            if currentMetric{1} >= pathMetric1{1}
+                            if currentMetric{3} >= pathMetric1{3}
                                  computedMetrics(state_id) = pathMetric1;
                             end
                         end
                         state_id = bi2de(pathMetric2{1},'left-msb') + 1;
                         currentMetric = computedMetrics(state_id);
-                        if isempty(currentMetric)
+                        if isempty(currentMetric) == 1
                             computedMetrics(state_id) = pathMetric2;
                         else
-                            if currentMetric{1} >= pathMetric2{1}
+                            if currentMetric{3} >= pathMetric2{3}
                                  computedMetrics(state_id) = pathMetric2;
                             end
                         end  
@@ -59,7 +55,7 @@ classdef ViterbiDecode
                 
                 for key = 1:length(obj.states)
                     pathMetric = computedMetrics(key);
-                    % {memory contents, m, path metric}
+                    % {memory contents, path, path metric}
                     if isempty(pathMetric) == 0
                         state = obj.states(key);
                         updatedState = state.updatePath(pathMetric);
@@ -68,13 +64,14 @@ classdef ViterbiDecode
                 end
             end
             decodedMessage = findMessage(obj.states);
+            obj.states = obj.start_states;
             return
         end
     end
 end
 
 function states = computeStateMachine(lengthOfFilter, fhEncode)
-    D = 0:2^lengthOfFilter - 1;
+    D = 0:2^(lengthOfFilter) - 1;
     str_B = dec2bin(D);
     cols = size(str_B,1);
     rows = size(str_B,2);
@@ -92,7 +89,7 @@ function states = computeStateMachine(lengthOfFilter, fhEncode)
         [output, output_state] = fhEncode(current_state, 0);
         state_1 = {output_state, output, 0};
         [output, output_state] = fhEncode(current_state, 1);
-        state_2 = {output_state, output, 0};
+        state_2 = {output_state, output, 1};
         brancheObj = Branches(current_state, state_1, state_2);
         state = TrellisState(current_state, brancheObj);
         states = [states state];
@@ -120,3 +117,5 @@ function message = findMessage(states)
     message = minStatePath;
     return
 end
+
+
