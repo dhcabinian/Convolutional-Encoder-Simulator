@@ -4,6 +4,7 @@ classdef ViterbiDecode
         start_states;
         constellation;
         decodeType;
+        encoder;
     end
     
     methods
@@ -12,8 +13,9 @@ classdef ViterbiDecode
 %     fhEncode = function handler to the encoding function used
 %     constellation = constellation object used
 %     decodeType = 'soft' or 'hard'
-        function obj = ViterbiDecode(lengthOfFilter, fhEncode, constellation, decodeType)
-            obj.states = computeStateMachine(lengthOfFilter, fhEncode);
+        function obj = ViterbiDecode(encoder, constellation, decodeType)
+            obj.encoder = encoder;
+            obj.states = computeStateMachine(encoder.encoderLength, encoder.functionHandler);
             obj.start_states = obj.states;
             obj.constellation = constellation;
             if strcmp(decodeType,'soft')
