@@ -81,7 +81,7 @@ classdef Constellation
 % outputs
 % codewordCellArr = Vector of bits associated with symbol closest to
 % complex number
-        function codewordCellArr = demodulate(obj, imagArr)
+        function codewordArr = demodulate(obj, imagArr)
             codewordCellArr = {};
             for comp = imagArr
                 keys = obj.bitKeyMapping.keys();
@@ -103,6 +103,10 @@ classdef Constellation
                     bits = [0 bits];
                 end
                 codewordCellArr{end + 1} = bits;
+            end
+            codewordArr = [];
+            for index = 1:length(codewordCellArr)
+                condewordArr(end + 1) = codewordCellArr{index};
             end
             return
         end

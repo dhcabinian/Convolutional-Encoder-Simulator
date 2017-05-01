@@ -7,6 +7,11 @@ classdef ViterbiDecode
     end
     
     methods
+% Inputs
+%     lengthOfFilter = number of delays + 1 (total number of inputs to filter)
+%     fhEncode = function handler to the encoding function used
+%     constellation = constellation object used
+%     decodeType = 'soft' or 'hard'
         function obj = ViterbiDecode(lengthOfFilter, fhEncode, constellation, decodeType)
             obj.states = computeStateMachine(lengthOfFilter, fhEncode);
             obj.start_states = obj.states;
@@ -17,7 +22,10 @@ classdef ViterbiDecode
                 obj.decodeType = 0;
             end
         end
-        
+% Inputs:
+%     r = a vector of either demodulated bits or complex numbers
+% Outputs:
+%     decodedMessage = a vector of message bits
         function decodedMessage = decodeMsg(obj, r)
             if obj.decodeType == 0
                 decodedMessage = obj.decodeBitMessage(r);
@@ -131,7 +139,11 @@ classdef ViterbiDecode
                     end
                 end
             end
-            decodedMessage = findMessage(obj.states);
+            decodedMessageCellArr = findMessage(obj.states);
+            decodedMessage = [];
+            for index = 1:length(decodedMessageCellArr)
+                decodedMessage = dec
+            end
             obj.states = obj.start_states;
             return
         end
