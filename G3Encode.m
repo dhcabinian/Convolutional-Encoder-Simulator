@@ -1,3 +1,11 @@
+% Notes:
+% First bit of codeword is unchecked in this encoder
+% Inputs:
+% Single Message bit
+% Input sate in form [m_i-1, m_i-2]
+% Outputs:
+% An array of [c_1 c_2 c_3]
+% Output state in form [m_i-1, m_i-2]
 function [output, output_state] = G3Encode(input_state, message_bits)
     %State in vector form [m_i-1, m_i-2]
     output_state = [message_bits(2) input_state];

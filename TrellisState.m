@@ -9,6 +9,8 @@ classdef TrellisState
     end
     
     methods
+%         Inputs:
+%             Branches = Branch object containing the 2 attached states from the state machine implementation
         function obj = TrellisState(state, branches)
             if (nargin > 0)
                 obj.id = bi2de(state,'left-msb') + 1;
@@ -23,7 +25,16 @@ classdef TrellisState
                 obj.path = [];
             end
         end
-
+%         Inputs
+%             c =  codeword vector of size 2 or 3 (depending on constellation)
+%             constellation =  constellation used to modulate
+%         Outputs
+%             Path Metrics for both states in form
+%             {memory contents, m, path metric} 
+%             Where memory contents = state
+%             m = either 1 bit or 2 bits of message (depending on constellation
+%             path metric = sum (hamming distance between recieved c and
+%             state transition c )   
         function [pathMetric1, pathMetric2] = computePathMetric(obj, c, constellation)
             % Branch metric
             % {memory contents, m, branch metric} 
@@ -40,7 +51,16 @@ classdef TrellisState
         end
         
         
-
+%         Inputs
+%             symb =  complex number representing symbol (depending on constellation)
+%             constellation =  constellation used to modulate
+%         Outputs
+%             Path Metrics for both states in form
+%             {memory contents, m, path metric} 
+%             Where memory contents = state
+%             m = either 1 bit or 2 bits of message (depending on constellation
+%             path metric = sum (distance between recieved symbol and
+%             actual constellation symbol)   
         function [pathMetric1, pathMetric2] = computePathMetricSymb(obj, symb, constellation)
             % Branch metric
             % {memory contents, m, branch metric} 

@@ -1,3 +1,9 @@
+%Inputs:
+%Single Message bit
+%Input sate in form [m_i-1, m_i-2]
+%Outputs:
+%An array of [c_1 c_2]
+%Output state in form [m_i-1, m_i-2]
 function [output, output_state] = G2Encode(input_state, message_bit)
     %State in vector form [m_i-1, m_i-2]
     output_state = [message_bit input_state];

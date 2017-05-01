@@ -6,6 +6,11 @@ classdef Constellation
     end
     
     methods
+        
+%  Inputs
+%     ConstellationSize = 4 (QPSK) or 8 (8PSK)
+%     Type = 'grey' 'natural' 'set'
+%     Es = Energy per symbol
         function obj = Constellation(constellationSize,type, Es)
             if constellationSize == 4
                 obj.constBitSize = 2;
@@ -52,6 +57,10 @@ classdef Constellation
             return
         end
         
+        % Inputs:
+        % codewordCellArr = Vector of message bits 
+        % Outputs:
+        % imagArr = Vector of complex numbers representing symbols
         function imagArr = modulate(obj, bits)
             imagArr = [];
             while mod(length(bits), obj.constBitSize) ~= 0 
@@ -67,6 +76,11 @@ classdef Constellation
             return
         end
         
+% Inputs:
+% imagArr = Vector of complex numbers representing symbols
+% outputs
+% codewordCellArr = Vector of bits associated with symbol closest to
+% complex number
         function codewordCellArr = demodulate(obj, imagArr)
             codewordCellArr = {};
             for comp = imagArr
