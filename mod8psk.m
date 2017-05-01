@@ -8,12 +8,16 @@ function complex = mod8psk(type, Es, bits)
     else 
         map = {[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]};
     end
-    position = -1;
-    for i = 1:numel(map)
-        if isequal(bits,map{i})
-            position = i;
+    complex = [];
+    [l,w] = size(bits);
+    for set = 1:3:w-2
+        position = -1;
+        for i = 1:numel(map)
+            if isequal(bits(set:1:set+2),map{i})
+                position = i;
+            end
         end
+        complex = [complex comp_arr(position)];
     end
-    complex = comp_arr(position);
     return;
 end
