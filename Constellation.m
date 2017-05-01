@@ -15,7 +15,7 @@ classdef Constellation
             if constellationSize == 4
                 obj.constBitSize = 2;
                 x = pi/4:pi/2:7*pi/4;
-                compArr = Es/2*cos(x) + Es/2*sin(x)*j;
+                compArr = sqrt(Es)*cos(x) + sqrt(Es)*sin(x)*j;
                 if strcmp(type,'grey')
                     map = {[0 0], [0 1], [1 1], [1 0]};
                 elseif strcmp(type,'natural')
@@ -28,7 +28,7 @@ classdef Constellation
             elseif constellationSize == 8
                 obj.constBitSize = 3;
                 x = pi/8:pi/4:15/8*pi;
-                compArr = Es/2*cos(x) + Es/2*sin(x)*j;
+                compArr = sqrt(Es)*cos(x) + sqrt(Es)*sin(x)*j;
                 if strcmp(type,'grey')
                     map = {[0, 0, 0], [0, 1, 0], [0, 1, 1], [0, 0, 1], [1, 0, 1], [1, 1, 1], [1, 1, 0], [1, 0, 0]};
                 elseif strcmp(type,'natural')
