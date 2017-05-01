@@ -99,6 +99,9 @@ classdef Constellation
                 for index = 1:length(bitsStr)
                     bits(index) = str2double(bitsStr(index));
                 end
+                while size(bits)<obj.constBitSize
+                    bits = [0 bits];
+                end
                 codewordCellArr{end + 1} = bits;
             end
             return
