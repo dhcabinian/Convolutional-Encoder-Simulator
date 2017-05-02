@@ -66,7 +66,7 @@ for dBEbN0 = -2:1:10
             afFigurePosition = [1 1 PaperWidth PaperHeight]; % set
             set(gcf, 'Position', afFigurePosition); % set figure position on paper [left bottom width height] 7 set(gcf, ’PaperPositionMode’, ’auto’); %
             set(gca, 'Units','normalized','Position',[0.1 0.15 0.85 0.8]); % fit axes within figure
-            saveas(gcf, 'test', 'pdf'); % save figure as ’test.pdf’
+            %saveas(gcf, 'test', 'pdf'); % save figure as ’test.pdf’
             drawnow;
             counter = 0;
         end
