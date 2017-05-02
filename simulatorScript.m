@@ -9,11 +9,10 @@ constMap = 'Natural';
 decodeType = 'Hard';
 encodeName = 'G1';
 framesError = 10;
-
 simulator(msgLength, encodeName, constName, constSize, constMap, decodeType, framesError)
-
 function simulator(msgLength, encodeName, constName, constSize, constMap, decodeType, framesError)
-    figure;
+    figureWindowTitle = sprintf('%s.%s.%s.%s',constName, constMap, decodeType, encodeName);
+    figure('Name', figureWindowTitle, 'NumberTitle', 'off');
     Ebs =[]; %initialize arrays for plotting
     fers = [];
     bers = [];
