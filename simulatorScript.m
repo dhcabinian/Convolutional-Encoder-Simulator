@@ -1,5 +1,6 @@
-msgLength = 12;
-constName = '8PSK';
+msgLength = 1500;
+framesError = 5;
+constName = 'QPSK';
 if strcmp(constName, 'QPSK')
     constSize = 4;
 else
@@ -7,8 +8,8 @@ else
 end
 constMap = 'Natural';
 decodeType = 'Hard';
-encodeName = 'Unencoded';
-framesError = 100;
+encodeName = 'G1';
+
 
 
 simulator(msgLength, encodeName, constName, constSize, constMap, decodeType, framesError)
@@ -19,7 +20,7 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     yAxisBers = [];
     n = msgLength;
     k = msgLength;
-    for dBEbN0 = -2:1:8
+    for dBEbN0 = -2:1:10
         EbN0 = 10^((dBEbN0)/10);
         N0 = 2; %number of symbols
         Eb = EbN0 * N0;
@@ -116,4 +117,5 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     ylabel('Bit Error Rate (%)');
     legendBerTitle = sprintf('%s, %s, %s, %s BER',constName, constMap, decodeType, encodeName);
     legend(p2,legendBerTitle); %insert legend
+    hold off;
 end
