@@ -7,8 +7,10 @@ else
 end
 constMap = 'Natural';
 decodeType = 'Hard';
-encodeName = 'G1';
+encodeName = 'Unencoded';
 framesError = 10;
+
+
 simulator(msgLength, encodeName, constName, constSize, constMap, decodeType, framesError)
 function simulator(msgLength, encodeName, constName, constSize, constMap, decodeType, framesError)
     figureWindowTitle = sprintf('%s.%s.%s.%s',constName, constMap, decodeType, encodeName);
@@ -37,15 +39,23 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
         pu=1; % initialize upper bound on Wilson interval;
         da = 1.96;
         error_counter = 0;
-        encoder = ConvEncode(encodeName);
-        c = Constellation(constSize,constMap,Es);
-        decoder = ViterbiDecode(encoder,c,decodeType);
+        if strcmp('Unencoded', encodeName)
+            c = Constellation(constSize,constMap,Es);
+        else
+            encoder = ConvEncode(encodeName);
+            c = Constellation(constSize,constMap,Es);
+            decoder = ViterbiDecode(encoder,c,decodeType);
+        end
         % Simulation of single transmission
         while(((frame_nb<30)||(abs(pu-pl)>0.1*frame_err/frame_nb))&& error_counter < framesError)
             counter = counter + 1; % counter for use to show difference in error rates
             frame_nb = frame_nb +1; % update count of frame simulations
             msg = (rand(1,k)>0.5); % generates k bits uniformly at random
-            cdwrd = encoder.encodeMsg(msg); % encodes message msg into codeword cdwrd of n bits
+            if strcmp('Unencoded', encodeName)
+                cdwrd = msg;
+            else
+                cdwrd = encoder.encodeMsg(msg); % encodes message msg into codeword cdwrd of n bits
+            end
             if mod(n,2)==1
                 cdwrd = [cdwrd 0]; % padding if odd length
             end
@@ -53,7 +63,11 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
             rcvd = symb + sqrt(sigma2)*(randn(size(symb))+j*randn(size(symb))); % channel noise
             rcvd_dem = zeros(1,3*length(symb)); % demodulation with optimal decision
             rcvd_dem = c.demodulate(rcvd); %demod8psk('natural',Es,rcvd);
-            cdwrd_est = decoder.decodeMsg(rcvd_dem); % form an estimate cdwrd ?est
+            if strcmp('Unencoded', encodeName)
+                cdwrd_est = rcvd_dem;
+            else
+                cdwrd_est = decoder.decodeMsg(rcvd_dem); % form an estimate cdwrd ?est
+            end
             bit_err = bit_err + sum(msg(1:n)~=cdwrd_est(1:n));
             frame_err = frame_err + (sum(msg(1:n)~=cdwrd_est(1:n))>0);
             if (sum(msg(1:n)~=cdwrd_est(1:n))>0)
@@ -64,7 +78,8 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
             pu = (fer + (da^2)/(2*frame_nb) + da*sqrt((fer*(1-fer)/frame_nb + (da/(2*frame_nb))^2))) / (1+(da^2)/frame_nb);
             pl = (fer + (da^2)/(2*frame_nb) - da*sqrt((fer*(1-fer)/frame_nb + (da/(2*frame_nb))^2))) / (1+(da^2)/frame_nb);
             if(counter == 1)   
-                p0 = errorbar(10*log10([Ebs Eb/N0]),[fers fer],[fers fer]-[pls pl], [pus pu]-[fers fer], '--g');
+                BER = qfunc(sqrt(2*[Ebs Eb/N0]));
+                p2 = plot(10*log10([Ebs Eb/N0]), BER, '--r');
                 set(gca,'YScale','log');
                 set(findall(gca, 'Type', 'Line'),'LineWidth',2);
                 set(gcf, 'Units', 'inches'); % set units
@@ -89,15 +104,12 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
         saveStateName = sprintf('%s.%s.%s.%s.mat',constName, constMap, decodeType, encodeName);
         save(saveStateName);
     end
-
-    figure('Name', constName)
+    figureWindowTitle = sprintf('%s.%s.%s.%s',constName, constMap, decodeType, encodeName);
+    figure('Name', figureWindowTitle, 'NumberTitle', 'off');
     hold off;
-    errorbar(10*log10(Ebs),fers,fers-pls, pus-fers, '--k');
     hold on;
-    p0 = plot(10*log10(Ebs),fers,'--g');
-    p1 = plot(10*log10(Ebs), bers, 'g--o');
-    %BER = qfunc(sqrt(2*Ebs));
-    %p2 = plot(10*log10(Ebs), BER, '--r');
+    BER = qfunc(sqrt(2*Ebs));
+    p2 = plot(10*log10(Ebs), BER, '--r');
     set(gca,'YScale','log');
     grid on;
     set(findall(gca, 'Type', 'Line'),'LineWidth',2);
@@ -108,7 +120,8 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     afFigurePosition = [1 1 PaperWidth PaperHeight]; % set
     set(gcf, 'Position', afFigurePosition); % set figure position on paper [left bottom width height] 7 set(gcf, ?PaperPositionMode?, ?auto?); %
     set(gca, 'Units','normalized','Position',[0.1 0.15 0.85 0.8]); % fit axes within figure
-    saveas(gcf, 'test', 'pdf'); % save figure as ?test.pdf?
+    saveStateName = sprintf('%s.%s.%s.%s.mat',constName, constMap, decodeType, encodeName);
+    saveas(gcf, saveStateName, 'pdf'); % save figure as ?test.pdf?
     titleString = sprintf('Frame and Bit Error Rates vs E_b/N_0 for %s, %s, %s, %s.',constName, constMap, decodeType, encodeName);
     title(titleString); %title
     xlabel('Power Efficiency E_b/N_0 (dB)'); %label axis
