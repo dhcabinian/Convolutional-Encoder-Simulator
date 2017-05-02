@@ -55,7 +55,7 @@ classdef Branches
         function [branchMetric1, branchMetric2] = computeBranchMetric(obj, c, constellation)
             if constellation.constBitSize == 3
                 uncheckedMsgBit = c(1);
-                c_remain = c(2:end);
+                c_remain = c(2);
                 %Compute branch 1 first
                 branchMetricState1 = sum(xor(c_remain, obj.state_1_c));
                 %Compute branch 2 first

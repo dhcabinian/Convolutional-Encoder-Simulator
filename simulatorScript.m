@@ -1,14 +1,14 @@
-msgLength = 1500;
+msgLength = 60;
 framesError = 5;
-constName = '8PSK';
+constName = 'QPSK';
 if strcmp(constName, 'QPSK')
     constSize = 4;
 else
     constSize = 8;
 end
-constMap = 'Natural';
+constMap = 'Grey';
 decodeType = 'Soft';
-encodeName = 'G3';
+encodeName = 'G1';
 
 
 

@@ -15,7 +15,7 @@ classdef ViterbiDecode
 %     decodeType = 'soft' or 'hard'
         function obj = ViterbiDecode(encoder, constellation, decodeType)
             obj.encoder = encoder;
-            obj.states = computeStateMachine(encoder.encoderLength, encoder.functionHandler);
+            obj.states = computeStateMachine(encoder);
             obj.start_states = obj.states;
             obj.constellation = constellation;
             if strcmp(decodeType,'Soft')
@@ -100,7 +100,8 @@ classdef ViterbiDecode
         function decodedMessage = decodeSymbMessage(obj, r)
             %For each pair of bits in m recieved
             computedMetrics = containers.Map(1:length(obj.states), cell(1,length(obj.states)));
-            for symb = r
+            for index = 1:length(r)
+                symb = r(index);
                 clearBranchMetricMap(computedMetrics);
                 %For each state at time = t in the trellis
                 for state = obj.states
@@ -148,8 +149,8 @@ classdef ViterbiDecode
     end
 end
 
-function states = computeStateMachine(lengthOfFilter, fhEncode)
-    D = 0:2^(lengthOfFilter) - 1;
+function states = computeStateMachine(encoder)
+    D = 0:2^(encoder.encoderLength) - 1;
     str_B = dec2bin(D);
     cols = size(str_B,1);
     rows = size(str_B,2);
@@ -164,15 +165,23 @@ function states = computeStateMachine(lengthOfFilter, fhEncode)
 
     for i = 1:cols
         current_state = int_B(i, 1:end);
-        [output, output_state] = fhEncode(current_state, 0);
+        if encoder.msgLength == 1
+            [output, output_state] = encoder.functionHandler(current_state, 0);
+        else
+            [output, output_state] = encoder.functionHandler(current_state, [0 0]);
+        end
         state_1 = {output_state, output, 0};
-        [output, output_state] = fhEncode(current_state, 1);
+        current_state = int_B(i, 1:end);
+        if encoder.msgLength == 1
+            [output, output_state] = encoder.functionHandler(current_state, 1);
+        else
+            [output, output_state] = encoder.functionHandler(current_state, [1 1]);
+        end
         state_2 = {output_state, output, 1};
         brancheObj = Branches(current_state, state_1, state_2);
         state = TrellisState(current_state, brancheObj);
         states = [states state];
     end
-
     return 
 end
 

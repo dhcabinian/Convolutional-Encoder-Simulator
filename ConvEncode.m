@@ -19,7 +19,7 @@ classdef ConvEncode
                 obj.msgLength = 1;
                 obj.inputState = zeros(1,obj.encoderLength);                
             elseif strcmp(type,'G3')
-                obj.functionHandler = @G2Encode;
+                obj.functionHandler = @G3Encode;
                 obj.encoderLength = 3;
                 obj.msgLength = 2;
                 obj.inputState = zeros(1,obj.encoderLength);               
