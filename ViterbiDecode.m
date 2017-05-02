@@ -18,9 +18,9 @@ classdef ViterbiDecode
             obj.states = computeStateMachine(encoder.encoderLength, encoder.functionHandler);
             obj.start_states = obj.states;
             obj.constellation = constellation;
-            if strcmp(decodeType,'soft')
+            if strcmp(decodeType,'Soft')
                 obj.decodeType = 1;
-            elseif strcmp(decodeType,'hard')
+            elseif strcmp(decodeType,'Hard')
                 obj.decodeType = 0;
             end
         end

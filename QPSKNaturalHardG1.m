@@ -64,9 +64,9 @@ for dBEbN0 = -2:1:10
             PaperHeight = PaperWidth*(sqrt(5)-1)/2; % paper height
             %set(fid, 'PaperSize', [PaperWidth PaperHeight]); % set
             afFigurePosition = [1 1 PaperWidth PaperHeight]; % set
-            set(gcf, 'Position', afFigurePosition); % set figure position on paper [left bottom width height] 7 set(gcf, ’PaperPositionMode’, ’auto’); %
+            set(gcf, 'Position', afFigurePosition); % set figure position on paper [left bottom width height] 7 set(gcf, ?PaperPositionMode?, ?auto?); %
             set(gca, 'Units','normalized','Position',[0.1 0.15 0.85 0.8]); % fit axes within figure
-            %saveas(gcf, 'test', 'pdf'); % save figure as ’test.pdf’
+            %saveas(gcf, 'test', 'pdf'); % save figure as ?test.pdf?
             drawnow;
             counter = 0;
         end
@@ -98,69 +98,12 @@ PaperWidth = 6; % paper width
 PaperHeight = PaperWidth*(sqrt(5)-1)/2; % paper height
 %set(fid, 'PaperSize', [PaperWidth PaperHeight]); % set
 afFigurePosition = [1 1 PaperWidth PaperHeight]; % set
-set(gcf, 'Position', afFigurePosition); % set figure position on paper [left bottom width height] 7 set(gcf, ’PaperPositionMode’, ’auto’); %
+set(gcf, 'Position', afFigurePosition); % set figure position on paper [left bottom width height] 7 set(gcf, ?PaperPositionMode?, ?auto?); %
 set(gca, 'Units','normalized','Position',[0.1 0.15 0.85 0.8]); % fit axes within figure
-saveas(gcf, 'test', 'pdf'); % save figure as ’test.pdf’
+saveas(gcf, 'test', 'pdf'); % save figure as ?test.pdf?
 
 title('Frame and Bit Error Rates vs E_b/N_0 for 8-PSK'); %title
 xlabel('Power Efficiency E_b/N_0 (dB)'); %label axis
 ylabel('Bit Error Rate (%)');
 legend([p0 p1],'8-PSK FER','8-PSK BER'); %insert legend
 
-function [G,H,A] = golayMatrix()
-A=[ 1 1 0 1 1 1 0 0 0 1 0 1 ; 1 0 1 1 1 0 0 0 1 0 1 1 ; 0 1 1 1 0 0 0 1 0 1 1 1;...
-    1 1 1 0 0 0 1 0 1 1 0 1 ; 1 1 0 0 0 1 0 1 1 0 1 1 ; 1 0 0 0 1 0 1 1 0 1 1 1; ... 
-    0 0 0 1 0 1 1 0 1 1 1 1 ; 0 0 1 0 1 1 0 1 1 1 0 1 ; 0 1 0 1 1 0 1 1 1 0 0 1; ... 
-    1 0 1 1 0 1 1 1 0 0 0 1 ; 0 1 1 0 1 1 1 0 0 0 1 1;1 1 1 1 1 1 1 1 1 1 1 0 ];
-G = [A eye(12)];
-H = [eye(12) A.'];
-end
-
-function cdwrd_est = golayDecode(r)
-    [G, H, A] = golayMatrix();
-    syndrome = mod(r*H',2);
-    if sum(syndrome) <= 3
-        error = [syndrome zeros(1,12)];
-        cdwrd_est = mod(error + r,2);
-        return
-    end
-    if sum(syndrome) > 3
-        possible_Ai = 0;
-        for i = 1:size(A, 1) %iterate over rows
-            if sum(mod(syndrome + A(i, :),2)) <= 2
-                possible_Ai = i;
-                break
-            end
-        end
-        if possible_Ai ~= 0
-            identity = eye(12);
-            error =  [mod(syndrome + A(possible_Ai,:),2) identity(possible_Ai, :)];
-            cdwrd_est = mod(error + r,2);
-            return
-        end
-    end
-    second_syndrome = mod(syndrome*A,2);
-    if sum(second_syndrome) <= 3
-        error = [zeros(1,12) second_syndrome];
-        cdwrd_est = mod(error + r,2);
-        return
-    end
-    if sum(second_syndrome) > 3
-        possible_Ai = 0;
-        for i = 1:size(A, 1) %iterate over rows
-            if sum(mod(second_syndrome + A(i, :),2)) <= 2
-                possible_Ai = i;
-                break
-            end
-        end
-        if possible_Ai ~= 0
-            identity = eye(12);
-            error =  [identity(possible_Ai, :) mod(second_syndrome + A(possible_Ai,:),2)];
-            cdwrd_est = mod(error + r,2);
-            return
-        end
-    end
-    cdwrd_est = r;
-    return
-end
-    
