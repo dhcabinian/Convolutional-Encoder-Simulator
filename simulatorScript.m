@@ -6,7 +6,7 @@ if strcmp(constName, 'QPSK')
 else
     constSize = 8;
 end
-constMap = 'Natural';
+constMap = 'Grey';
 decodeType = 'Soft';
 encodeName = 'G3';
 
