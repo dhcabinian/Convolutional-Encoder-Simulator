@@ -1,5 +1,5 @@
-msgLength = 1000;
-constName = 'QPSK';
+msgLength = 12;
+constName = '8PSK';
 if strcmp(constName, 'QPSK')
     constSize = 4;
 else
@@ -7,8 +7,8 @@ else
 end
 constMap = 'Natural';
 decodeType = 'Hard';
-encodeName = 'G1';
-framesError = 10;
+encodeName = 'Unencoded';
+framesError = 100;
 
 
 simulator(msgLength, encodeName, constName, constSize, constMap, decodeType, framesError)
@@ -23,7 +23,11 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
         EbN0 = 10^((dBEbN0)/10);
         N0 = 2; %number of symbols
         Eb = EbN0 * N0;
-        Es = Eb * 2 * k / n;
+        if strcmp('QPSK', constName)
+            Es = Eb * 2 * k / n;
+        else
+            Es = Eb * 3 * k / n;
+        end
         % Model parameters
         %Es = 1; % energy per QPSK symbol
         %Eb = Es/2*(n/k); % energy per coded bit
@@ -65,9 +69,8 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
                 new_error_bool = 1;
             end
             ber = bit_err/(message_counter*msgLength);
-            if(new_error_bool)   
-                BER = qfunc(sqrt(2*[xAxisEbs Eb/N0]));
-                p2 = plot(10*log10([xAxisEbs Eb/N0]), BER, '--r');
+            if(new_error_bool)
+                p2 = plot(10*log10([xAxisEbs Eb/N0]), [yAxisBers ber], '--r');
                 set(gca,'YScale','log');
                 set(findall(gca, 'Type', 'Line'),'LineWidth',2);
                 set(gcf, 'Units', 'inches'); % set units
@@ -94,8 +97,7 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     figure('Name', figureWindowTitle, 'NumberTitle', 'off');
     hold off;
     hold on;
-    BER = qfunc(sqrt(2*xAxisEbs));
-    p2 = plot(10*log10(xAxisEbs), BER, '--r');
+    p2 = plot(10*log10(xAxisEbs), yAxisBers, '--r');
     set(gca,'YScale','log');
     grid on;
     set(findall(gca, 'Type', 'Line'),'LineWidth',2);
