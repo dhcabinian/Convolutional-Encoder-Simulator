@@ -88,7 +88,7 @@ classdef Constellation
                 min_dist = [];
                 min_bit = [];
                 for key = keys
-                    distance = abs(comp-obj.bitKeyMapping(key{1}));
+                    distance = norm(comp-obj.bitKeyMapping(key{1}));
                     if isempty(min_bit) || distance < min_dist
                         min_dist = distance;
                         min_bit = key{1};

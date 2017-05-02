@@ -1,4 +1,4 @@
-msgLength = 10000;
+msgLength = 1000;
 constName = 'QPSK';
 if strcmp(constName, 'QPSK')
     constSize = 4;
@@ -15,14 +15,11 @@ simulator(msgLength, encodeName, constName, constSize, constMap, decodeType, fra
 function simulator(msgLength, encodeName, constName, constSize, constMap, decodeType, framesError)
     figureWindowTitle = sprintf('%s.%s.%s.%s',constName, constMap, decodeType, encodeName);
     figure('Name', figureWindowTitle, 'NumberTitle', 'off');
-    Ebs =[]; %initialize arrays for plotting
-    fers = [];
-    bers = [];
-    pus = [];
-    pls = [];
+    xAxisEbs =[]; %initialize arrays for plotting
+    yAxisBers = [];
     n = msgLength;
     k = msgLength;
-    for dBEbN0 = -2:1:4
+    for dBEbN0 = -2:1:8
         EbN0 = 10^((dBEbN0)/10);
         N0 = 2; %number of symbols
         Eb = EbN0 * N0;
@@ -31,14 +28,9 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
         %Es = 1; % energy per QPSK symbol
         %Eb = Es/2*(n/k); % energy per coded bit
         sigma2 = N0/2; % noise variance
-        frame_err = 0; % initialize the number of frame errors
         bit_err = 0; % initialize the number of bit errors
-        frame_nb = 0; % initialize the number of codeword transmissions
-        counter = 0;
-        pl=0; % initialize lower bound on Wilson interval;
-        pu=1; % initialize upper bound on Wilson interval;
-        da = 1.96;
         error_counter = 0;
+        message_counter = 0;
         if strcmp('Unencoded', encodeName)
             c = Constellation(constSize,constMap,Es);
         else
@@ -47,9 +39,8 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
             decoder = ViterbiDecode(encoder,c,decodeType);
         end
         % Simulation of single transmission
-        while(((frame_nb<30)||(abs(pu-pl)>0.1*frame_err/frame_nb))&& error_counter < framesError)
-            counter = counter + 1; % counter for use to show difference in error rates
-            frame_nb = frame_nb +1; % update count of frame simulations
+        while(error_counter < framesError)
+            message_counter = message_counter + 1;
             msg = (rand(1,k)>0.5); % generates k bits uniformly at random
             if strcmp('Unencoded', encodeName)
                 cdwrd = msg;
@@ -60,26 +51,23 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
                 cdwrd = [cdwrd 0]; % padding if odd length
             end
             symb = c.modulate(cdwrd);
-            rcvd = symb + sqrt(sigma2)*(randn(size(symb))+j*randn(size(symb))); % channel noise
-            rcvd_dem = zeros(1,3*length(symb)); % demodulation with optimal decision
-            rcvd_dem = c.demodulate(rcvd); %demod8psk('natural',Es,rcvd);
+            rcvd_symb = symb + sqrt(sigma2)*(randn(size(symb))+j*randn(size(symb))); % channel noise
+            rcvdBits = c.demodulate(rcvd_symb); %demod8psk('natural',Es,rcvd);
             if strcmp('Unencoded', encodeName)
-                cdwrd_est = rcvd_dem;
+                cdwrd_est = rcvdBits;
             else
-                cdwrd_est = decoder.decodeMsg(rcvd_dem); % form an estimate cdwrd ?est
+                cdwrd_est = decoder.decodeMsg(rcvdBits); % form an estimate cdwrd ?est
             end
             bit_err = bit_err + sum(msg(1:n)~=cdwrd_est(1:n));
-            frame_err = frame_err + (sum(msg(1:n)~=cdwrd_est(1:n))>0);
+            new_error_bool = 0;
             if (sum(msg(1:n)~=cdwrd_est(1:n))>0)
                 error_counter = error_counter+1;
+                new_error_bool = 1;
             end
-            fer = frame_err/frame_nb;
-            ber = bit_err/(frame_nb*n);
-            pu = (fer + (da^2)/(2*frame_nb) + da*sqrt((fer*(1-fer)/frame_nb + (da/(2*frame_nb))^2))) / (1+(da^2)/frame_nb);
-            pl = (fer + (da^2)/(2*frame_nb) - da*sqrt((fer*(1-fer)/frame_nb + (da/(2*frame_nb))^2))) / (1+(da^2)/frame_nb);
-            if(counter == 1)   
-                BER = qfunc(sqrt(2*[Ebs Eb/N0]));
-                p2 = plot(10*log10([Ebs Eb/N0]), BER, '--r');
+            ber = bit_err/(message_counter*msgLength);
+            if(new_error_bool)   
+                BER = qfunc(sqrt(2*[xAxisEbs Eb/N0]));
+                p2 = plot(10*log10([xAxisEbs Eb/N0]), BER, '--r');
                 set(gca,'YScale','log');
                 set(findall(gca, 'Type', 'Line'),'LineWidth',2);
                 set(gcf, 'Units', 'inches'); % set units
@@ -97,11 +85,8 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
                 break;
             end
         end
-        Ebs = [Ebs Eb/N0]; % add new points to arrays for plotting
-        fers = [fers fer];
-        bers = [bers ber];
-        pus = [pus pu];
-        pls = [pls pl];
+        xAxisEbs = [xAxisEbs Eb/N0]; % add new points to arrays for plotting
+        yAxisBers = [yAxisBers ber];
         saveStateName = sprintf('%s.%s.%s.%s.mat',constName, constMap, decodeType, encodeName);
         save(saveStateName);
     end
@@ -109,8 +94,8 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     figure('Name', figureWindowTitle, 'NumberTitle', 'off');
     hold off;
     hold on;
-    BER = qfunc(sqrt(2*Ebs));
-    p2 = plot(10*log10(Ebs), BER, '--r');
+    BER = qfunc(sqrt(2*xAxisEbs));
+    p2 = plot(10*log10(xAxisEbs), BER, '--r');
     set(gca,'YScale','log');
     grid on;
     set(findall(gca, 'Type', 'Line'),'LineWidth',2);
@@ -127,6 +112,6 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     title(titleString); %title
     xlabel('Power Efficiency E_b/N_0 (dB)'); %label axis
     ylabel('Bit Error Rate (%)');
-    legendBerTitle = sprintf('%s BER', constName);
+    legendBerTitle = sprintf('%s, %s, %s, %s BER',constName, constMap, decodeType, encodeName);
     legend(p2,legendBerTitle); %insert legend
 end
