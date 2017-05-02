@@ -4,8 +4,8 @@ fers = [];
 bers = [];
 pus = [];
 pls = [];
-n = 6;
-k = 6;
+n = 10000;
+k = 10000;
 error_counter = 0;
 for dBEbN0 = -2:1:10
     EbN0 = 10^((dBEbN0)/10);
@@ -55,7 +55,7 @@ for dBEbN0 = -2:1:10
         pl = (fer + (da^2)/(2*frame_nb) - da*sqrt((fer*(1-fer)/frame_nb + (da/(2*frame_nb))^2))) / (1+(da^2)/frame_nb);
         %p_err = sum(cdwrd~=cdwrd_est)/n; % computes the BER over the codeword
         %err = (perr>0); % computes whether a frame error occured
-        if(counter == 10)   
+        if(counter == 1)   
             p0 = errorbar(10*log10([Ebs Eb/N0]),[fers fer],[fers fer]-[pls pl], [pus pu]-[fers fer], '--g');
             set(gca,'YScale','log');
             set(findall(gca, 'Type', 'Line'),'LineWidth',2);
