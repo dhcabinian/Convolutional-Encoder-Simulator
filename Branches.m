@@ -4,7 +4,7 @@ classdef Branches
         state_1;
         state_1_c;
         state_1_m;
-        state_2;
+        state_2; 
         state_2_c;
         state_2_m;
     end

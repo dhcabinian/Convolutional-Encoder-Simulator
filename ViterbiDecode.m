@@ -5,7 +5,7 @@ classdef ViterbiDecode
         constellation;
         decodeType;
         encoder;
-    end
+    end 
     
     methods
 % Inputs

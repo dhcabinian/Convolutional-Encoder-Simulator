@@ -6,7 +6,7 @@ classdef ConvEncode
         inputState;
         outLength;
     end
-    
+     
     methods
         function obj = ConvEncode(type)
             if strcmp(type,'G1')

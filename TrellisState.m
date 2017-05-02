@@ -6,7 +6,7 @@ classdef TrellisState
         path_metric;
         branches;
         reached;
-    end
+    end 
     
     methods
 %         Inputs:
