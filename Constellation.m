@@ -106,7 +106,7 @@ classdef Constellation
             end
             codewordArr = [];
             for index = 1:length(codewordCellArr)
-                condewordArr(end + 1) = codewordCellArr{index};
+                codewordArr= [codewordArr codewordCellArr{index}];
             end
             return
         end

@@ -51,7 +51,7 @@ classdef ViterbiDecode
             numberOfC = length(r) / obj.constellation.constBitSize;
             cs = transpose(reshape(r, [], numberOfC));
             for row = 1:size(cs,1)
-                c = cs(row, :)
+                c = cs(row, :);
                 clearBranchMetricMap(computedMetrics);
                 %For each state at time = t in the trellis
                 for state = obj.states

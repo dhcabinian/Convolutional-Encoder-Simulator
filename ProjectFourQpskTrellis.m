@@ -4,8 +4,8 @@ fers = [];
 bers = [];
 pus = [];
 pls = [];
-n = 300;
-k = 300;
+n = 6;
+k = 6;
 error_counter = 0;
 for dBEbN0 = -2:1:10
     EbN0 = 10^((dBEbN0)/10);
@@ -24,30 +24,29 @@ for dBEbN0 = -2:1:10
     pu=1; % initialize upper bound on Wilson interval;
     da = 1.96;
     error_counter = 0;
+    encoder = ConvEncode('G1');
     c = Constellation(4,'natural',Es);
-    input_state = zeros(1,3);
+    decoder = ViterbiDecode(encoder,c,'hard');
     % Simulation of single transmission
     while(((frame_nb<30)||(abs(pu-pl)>0.1*frame_err/frame_nb))&& error_counter < 10)
         counter = counter + 1; % counter for use to show difference in error rates
         frame_nb = frame_nb +1; % update count of frame simulations
         msg = (rand(1,k)>0.5); % generates k bits uniformly at random
-        [cdwrd, input_state] = fhEncode(msg, input_state); % REPLACE THIS LINE BY YOUR SOLUTION: encodes message msg into codeword cdwrd of n bits
-        if mod(n,3)==1
-            cdwrd = [cdwrd 0 0]; % padding if odd length
-        elseif mod(n,3)==2
-            cdwrd = [cdwrd 0];
+        cdwrd = encoder.encodeMsg(msg); % REPLACE THIS LINE BY YOUR SOLUTION: encodes message msg into codeword cdwrd of n bits
+        if mod(n,2)==1
+            cdwrd = [cdwrd 0]; % padding if odd length
         end
-        symb = c.modulate(msg); %mod8psk('natural',Es,cdwrd); %sqrt(Es/2)*(1-2*cdwrd(1:2:end))+j*sqrt(Es/2)*(1-2*cdwrd(2:2:end)); % QPSK modulation
+        symb = c.modulate(cdwrd); %mod8psk('natural',Es,cdwrd); %sqrt(Es/2)*(1-2*cdwrd(1:2:end))+j*sqrt(Es/2)*(1-2*cdwrd(2:2:end)); % QPSK modulation
         rcvd = symb + sqrt(sigma2)*(randn(size(symb))+j*randn(size(symb))); % channel noise
         rcvd_dem = zeros(1,3*length(symb)); % demodulation with optimal decision
         rcvd_dem = c.demodulate(rcvd); %demod8psk('natural',Es,rcvd);
         %rcvd_dem(1:2:end) = (real(rcvd)<0); % hard decoding of in-phase (I) component
         %rcvd_dem(2:2:end) = (imag(rcvd)<0); % hard decoding of out-of-phase (Q) component
         %rcvd_dem = rcvd_dem(1:n); % removes the padded bits
-        cdwrd_est = rcvd_dem; % REPLACE THIS LINE BY YOUR SOLUTION: form an estimate cdwrd ?est
-        bit_err = bit_err + sum(cdwrd(1:n)~=cdwrd_est(1:n));
-        frame_err = frame_err + (sum(cdwrd(1:n)~=cdwrd_est(1:n))>0);
-        if (sum(cdwrd(1:n)~=cdwrd_est(1:n))>0)
+        cdwrd_est = decoder.decodeMsg(rcvd_dem); % REPLACE THIS LINE BY YOUR SOLUTION: form an estimate cdwrd ?est
+        bit_err = bit_err + sum(cdwrd(1:n)~=msg(1:n));
+        frame_err = frame_err + (sum(msg(1:n)~=cdwrd_est(1:n))>0);
+        if (sum(msg(1:n)~=cdwrd_est(1:n))>0)
             error_counter = error_counter+1;
         end
         fer = frame_err/frame_nb;
