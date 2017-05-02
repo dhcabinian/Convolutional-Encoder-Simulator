@@ -24,7 +24,7 @@ for dBEbN0 = -2:1:10
     pu=1; % initialize upper bound on Wilson interval;
     da = 1.96;
     error_counter = 0;
-    encoder = ConvEncode('G1');
+    encoder = ConvEncode('G2');
     c = Constellation(4,'grey',Es);
     decoder = ViterbiDecode(encoder,c,'hard');
     % Simulation of single transmission
@@ -79,7 +79,7 @@ for dBEbN0 = -2:1:10
     bers = [bers ber];
     pus = [pus pu];
     pls = [pls pl];
-    save('QPSKGreyHardG1.mat');
+    save('QPSKGreyHardG2.mat');
 end
 
 figure('Name','8-PSK')

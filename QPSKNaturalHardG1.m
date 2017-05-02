@@ -44,7 +44,7 @@ for dBEbN0 = -2:1:10
         %rcvd_dem(2:2:end) = (imag(rcvd)<0); % hard decoding of out-of-phase (Q) component
         %rcvd_dem = rcvd_dem(1:n); % removes the padded bits
         cdwrd_est = decoder.decodeMsg(rcvd_dem); % REPLACE THIS LINE BY YOUR SOLUTION: form an estimate cdwrd ?est
-        bit_err = bit_err + sum(cdwrd(1:n)~=msg(1:n));
+        bit_err = bit_err + sum(msg(1:n)~=cdwrd_est(1:n));
         frame_err = frame_err + (sum(msg(1:n)~=cdwrd_est(1:n))>0);
         if (sum(msg(1:n)~=cdwrd_est(1:n))>0)
             error_counter = error_counter+1;
@@ -79,6 +79,7 @@ for dBEbN0 = -2:1:10
     bers = [bers ber];
     pus = [pus pu];
     pls = [pls pl];
+    save('QPSKNaturalHardG1.mat');
 end
 
 figure('Name','8-PSK')
