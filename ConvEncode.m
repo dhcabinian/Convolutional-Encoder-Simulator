@@ -4,6 +4,7 @@ classdef ConvEncode
         encoderLength;
         msgLength;
         inputState;
+        outLength;
     end
     
     methods
@@ -13,34 +14,53 @@ classdef ConvEncode
                 obj.encoderLength = 3;
                 obj.msgLength = 1;
                 obj.inputState = zeros(1,obj.encoderLength);
+                obj.outLength = 2;
             elseif strcmp(type,'G2')
                 obj.functionHandler = @G2Encode;
                 obj.encoderLength = 8;
                 obj.msgLength = 1;
-                obj.inputState = zeros(1,obj.encoderLength);                
+                obj.inputState = zeros(1,obj.encoderLength); 
+                obj.outLength = 2;
             elseif strcmp(type,'G3')
                 obj.functionHandler = @G3Encode;
                 obj.encoderLength = 3;
                 obj.msgLength = 2;
-                obj.inputState = zeros(1,obj.encoderLength);               
+                obj.inputState = zeros(1,obj.encoderLength);
+                obj.outLength = 3;
             end
         end
         
         
         function encodedMsg = encodeMsg(obj, msg)
-            state = obj.inputState;
-            while mod(length(msg), obj.msgLength) ~= 0
-                msg = [msg 0];
+            if obj.msgLength == 1
+                state = obj.inputState;
+                while mod(length(msg), obj.msgLength) ~= 0
+                    msg = [msg 0];
+                end
+                encodedMsg = [];
+                numberOfMsgs = length(msg) / obj.msgLength;
+                msgs = transpose(reshape(msg, [], numberOfMsgs));
+                for row = 1:size(msgs,1)
+                    msg_bits = msgs(row, :);
+                    [codeword, state] = obj.functionHandler(state, msg_bits);
+                    encodedMsg = [encodedMsg codeword];
+                end
+                return
+            else
+                state = obj.inputState;
+                while mod(length(msg), obj.msgLength) ~= 0
+                    msg = [msg 0];
+                end
+                encodedMsg = [];
+                numberOfMsgs = length(msg) / obj.msgLength;
+                msgs = transpose(reshape(msg, [], numberOfMsgs));
+                for row = 1:size(msgs,1)
+                    msg_bits = msgs(row, :);
+                    [codeword, state] = obj.functionHandler(state, msg_bits);
+                    encodedMsg = [encodedMsg  msg_bits(1) codeword];
+                end
+                return                
             end
-            encodedMsg = [];
-            numberOfMsgs = length(msg) / obj.msgLength;
-            msgs = transpose(reshape(msg, [], numberOfMsgs));
-            for row = 1:size(msgs,1)
-                msg_bits = msgs(row, :);
-                [codeword, state] = obj.functionHandler(state, msg_bits);
-                encodedMsg = [encodedMsg codeword];
-            end
-            return
         end
         
         function [codeword, output_state] = encode(obj, input_state, msg_bits)
@@ -75,8 +95,8 @@ end
 function [output, output_state] = G2Encode(input_state, message_bit)
     %State in vector form [m_i-1, m_i-2]
     output_state = [message_bit input_state];
-    c_1 = mod(output_state(1) + output_state(3)+ output_state(6) + output_state(7)+ output_state(8),2);
-    c_2 = mod(output_state(1) + output_state(2)+ output_state(3)+ output_state(4) + output_state(5)+ output_state(8) ,2);
+    c_1 = mod(output_state(1) + output_state(3) + output_state(6) + output_state(7)+ output_state(8),2);
+    c_2 = mod(output_state(1) + output_state(2) + output_state(3) + output_state(4) + output_state(5) + output_state(8),2);
     output = [c_1 c_2];
     output_state = output_state(1:end-1);
     return
@@ -93,10 +113,10 @@ end
 function [output, output_state] = G3Encode(input_state, message_bits)
     %State in vector form [m_i-1, m_i-2]
     output_state = [message_bits(2) input_state];
-    c_1 = message_bits(1); % not certain if this is equivalent to unchecked (0)
+    %c_1 = message_bits(1); % not certain if this is equivalent to unchecked (0)
     c_2 = mod(output_state(1) + output_state(3),2);
     c_3 = mod(output_state(2),2);
-    output = [c_1 c_2 c_3];
+    output = [c_2 c_3];
     output_state = output_state(1:end-1);
     return
 end

@@ -1,14 +1,14 @@
-msgLength = 60;
+msgLength = 6;
 framesError = 5;
-constName = 'QPSK';
+constName = '8PSK';
 if strcmp(constName, 'QPSK')
     constSize = 4;
 else
     constSize = 8;
 end
-constMap = 'Grey';
+constMap = 'Natural';
 decodeType = 'Soft';
-encodeName = 'G1';
+encodeName = 'G3';
 
 
 
@@ -47,6 +47,7 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
         while(error_counter < framesError)
             message_counter = message_counter + 1;
             msg = (rand(1,k)>0.5); % generates k bits uniformly at random
+           %msg = [1 0 0 1 1 1];
             if strcmp('Unencoded', encodeName)
                 cdwrd = msg;
             else
@@ -57,6 +58,7 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
             end
             symb = c.modulate(cdwrd);
             rcvd_symb = symb + sqrt(sigma2)*(randn(size(symb))+j*randn(size(symb))); % channel noise
+            %rcvd_symb = symb; %For testing no noise
             if strcmp('Hard', decodeType)
                 rcvdBits = c.demodulate(rcvd_symb); %demod8psk('natural',Es,rcvd);
             else

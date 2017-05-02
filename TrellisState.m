@@ -35,12 +35,12 @@ classdef TrellisState
 %             m = either 1 bit or 2 bits of message (depending on constellation
 %             path metric = sum (hamming distance between recieved c and
 %             state transition c )   
-        function [pathMetric1, pathMetric2] = computePathMetric(obj, c, constellation)
+        function [pathMetric1, pathMetric2] = computePathMetric(obj, c, encoder)
             % Branch metric
             % {memory contents, m, branch metric} 
             % Path metric
             % {memory contents, path, path metric} 
-            [branchMetric1, branchMetric2] = obj.branches.computeBranchMetric(c, constellation);
+            [branchMetric1, branchMetric2] = obj.branches.computeBranchMetric(c, encoder);
             pathMetric1 = branchMetric1;
             pathMetric1{3} = pathMetric1{3} + obj.path_metric;
             pathMetric1{2} = [obj.path branchMetric1{2}];
@@ -61,12 +61,12 @@ classdef TrellisState
 %             m = either 1 bit or 2 bits of message (depending on constellation
 %             path metric = sum (distance between recieved symbol and
 %             actual constellation symbol)   
-        function [pathMetric1, pathMetric2] = computePathMetricSymb(obj, symb, constellation)
+        function [pathMetric1, pathMetric2] = computePathMetricSymb(obj, symb, encoder, constellation)
             % Branch metric
             % {memory contents, m, branch metric} 
             % Path metric
             % {memory contents, path, path metric} 
-            [branchMetric1, branchMetric2] = obj.branches.computeBranchMetricSymb(symb, constellation);
+            [branchMetric1, branchMetric2] = obj.branches.computeBranchMetricSymb(symb, encoder, constellation);
             pathMetric1 = branchMetric1;
             pathMetric1{3} = pathMetric1{3} + obj.path_metric;
             pathMetric1{2} = [obj.path branchMetric1{2}];
