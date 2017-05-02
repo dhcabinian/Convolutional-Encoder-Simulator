@@ -1,4 +1,4 @@
-msgLength = 6;
+msgLength = 10000;
 constName = 'QPSK';
 if strcmp(constName, 'QPSK')
     constSize = 4;
@@ -7,7 +7,7 @@ else
 end
 constMap = 'Natural';
 decodeType = 'Hard';
-encodeName = 'Unencoded';
+encodeName = 'G1';
 framesError = 10;
 
 
@@ -22,7 +22,7 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     pls = [];
     n = msgLength;
     k = msgLength;
-    for dBEbN0 = -2:1:10
+    for dBEbN0 = -2:1:4
         EbN0 = 10^((dBEbN0)/10);
         N0 = 2; %number of symbols
         Eb = EbN0 * N0;
@@ -86,6 +86,7 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
                 PaperWidth = 6; % paper width
                 PaperHeight = PaperWidth*(sqrt(5)-1)/2; % paper height
                 afFigurePosition = [1 1 PaperWidth PaperHeight]; % set
+                grid on;
                 set(gcf, 'Position', afFigurePosition); % set figure position on paper [left bottom width height] 7 set(gcf, ?PaperPositionMode?, ?auto?); %
                 set(gca, 'Units','normalized','Position',[0.1 0.15 0.85 0.8]); % fit axes within figure
                 %saveas(gcf, 'test', 'pdf'); % save figure as ?test.pdf?
@@ -126,7 +127,6 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     title(titleString); %title
     xlabel('Power Efficiency E_b/N_0 (dB)'); %label axis
     ylabel('Bit Error Rate (%)');
-    legendFerTitle = sprintf('%s FER', constName);
     legendBerTitle = sprintf('%s BER', constName);
-    legend([p0 p1],legendFerTitle,legendBerTitle); %insert legend
+    legend(p2,legendBerTitle); %insert legend
 end
