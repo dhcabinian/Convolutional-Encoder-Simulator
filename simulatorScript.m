@@ -1,4 +1,4 @@
-msgLength = 1500;
+msgLength = 6;
 framesError = 5;
 constName = '8PSK';
 if strcmp(constName, 'QPSK')
