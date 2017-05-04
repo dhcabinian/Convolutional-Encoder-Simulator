@@ -1,4 +1,4 @@
-msgLength = 6;
+msgLength = 1500;
 framesError = 5;
 constName = '8PSK';
 if strcmp(constName, 'QPSK')
@@ -20,7 +20,7 @@ function simulator(msgLength, encodeName, constName, constSize, constMap, decode
     yAxisBers = [];
     n = msgLength;
     k = msgLength;
-    for dBEbN0 = -2:1:10
+    for dBEbN0 = -2:1:16
         EbN0 = 10^((dBEbN0)/10);
         N0 = 2; %number of symbols
         Eb = EbN0 * N0;
